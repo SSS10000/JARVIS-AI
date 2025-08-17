@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>⚡ Realtime Data Share — Pro (Ultra Fast)</title>
+  <title>⚡ Realtime Data Share — Ultra Fast (Fixed)</title>
 
   <!-- Tailwind -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
@@ -22,7 +22,6 @@
     @keyframes gradientShift{ 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
     .glass{ backdrop-filter: blur(14px); background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.25); box-shadow: 0 20px 60px rgba(0,0,0,.25) }
     .card{ position:relative; overflow:hidden; background: rgba(255,255,255,.92); border-radius:16px; box-shadow:0 20px 45px rgba(0,0,0,.15); transition:transform .25s, box-shadow .25s }
-    .card:before{ content:""; position:absolute; inset:-2px; background:conic-gradient(from 180deg at 50% 50%, rgba(99,102,241,.25), rgba(236,72,153,.22), rgba(20,184,166,.18), transparent 70%); filter: blur(16px); z-index:-1 }
     .f-input{ border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:.8rem }
     .btn{ border-radius:12px; padding:.7rem 1rem; font-weight:700; color:#fff; transition:transform .15s, box-shadow .15s; cursor:pointer }
     .btn-indigo{ background:linear-gradient(135deg,#6366f1,#a855f7) }
@@ -45,16 +44,14 @@
   </style>
 </head>
 <body class="bg-animated">
-  <!-- Loader -->
   <div id="loader" class="loader-wrap"><div class="spinner"></div></div>
-  <!-- Toasts -->
   <div id="toasts" class="toasts"></div>
 
   <div class="glass w-full max-w-7xl mx-auto my-8 md:my-12 rounded-3xl p-6 md:p-10 animate__animated animate__fadeIn">
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
-        <h1 class="text-3xl md:text-5xl font-extrabold text-white drop-shadow">⚡ Realtime Data Share — Ultra Fast</h1>
-        <span class="badge hidden md:inline">Storage • Metadata • Progress</span>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-white drop-shadow">⚡ Realtime Data Share — Fixed</h1>
+        <span class="badge hidden md:inline">Storage + Metadata</span>
       </div>
       <div class="flex items-center gap-2">
         <button id="darkToggle" class="btn btn-light px-4 py-2">🌙 Dark</button>
@@ -63,12 +60,8 @@
     </div>
 
     <div class="grid lg:grid-cols-3 gap-6">
-      <!-- Sender -->
       <div class="card p-6 space-y-4 lg:col-span-1">
-        <div class="flex items-center gap-2">
-          <span class="dot" style="background:var(--indigo);width:10px;height:10px;border-radius:999px;"></span>
-          <h2 class="text-2xl text-indigo-700">📤 Sender</h2>
-        </div>
+        <div class="flex items-center gap-2"><span style="background:var(--indigo);width:10px;height:10px;border-radius:999px;"></span><h2 class="text-2xl text-indigo-700">📤 Sender</h2></div>
 
         <div class="grid gap-3">
           <div class="flex gap-2">
@@ -90,7 +83,7 @@
           </div>
 
           <div class="grid grid-cols-2 gap-3">
-            <input id="passphrase" class="f-input" placeholder="Passphrase (optional - encryption)"/>
+            <input id="passphrase" class="f-input" placeholder="Passphrase (optional)"/>
             <select id="expiry" class="f-input">
               <option value="600000">Expire 10 min</option>
               <option value="3600000">Expire 1 hour</option>
@@ -103,7 +96,7 @@
 
           <button id="sendBtn" class="btn btn-indigo w-full">🚀 Send (Fast)</button>
           <div class="mt-2">
-            <div class="progress" id="progress"></div>
+            <div id="progress" class="progress"></div>
             <div class="flex justify-between mt-1 small">
               <div id="progressLabel">0%</div>
               <div id="est">ETA: --</div>
@@ -122,9 +115,8 @@
         </div>
       </div>
 
-      <!-- Receiver -->
       <div class="card p-6 lg:col-span-1">
-        <div class="flex items-center gap-2 mb-4"><span class="dot" style="background:var(--emerald);width:10px;height:10px;border-radius:999px;"></span><h2 class="text-2xl text-green-700">📥 Receiver</h2></div>
+        <div class="flex items-center gap-2 mb-4"><span style="background:var(--emerald);width:10px;height:10px;border-radius:999px;"></span><h2 class="text-2xl text-green-700">📥 Receiver</h2></div>
         <label class="block text-sm font-semibold mb-2">Enter ID to receive</label>
         <div class="flex gap-2 mb-4">
           <input id="receiverId" class="f-input flex-1" placeholder="ID to receive"/>
@@ -136,9 +128,8 @@
         <div id="receiveBox" class="space-y-3"></div>
       </div>
 
-      <!-- History -->
       <div class="card p-6 lg:col-span-1">
-        <div class="flex items-center gap-2 mb-4"><span class="dot" style="background:var(--blue);width:10px;height:10px;border-radius:999px;"></span><h2 class="text-2xl text-blue-700">📜 History</h2></div>
+        <div class="flex items-center gap-2 mb-4"><span style="background:var(--blue);width:10px;height:10px;border-radius:999px;"></span><h2 class="text-2xl text-blue-700">📜 History</h2></div>
         <div class="flex gap-2 mb-4">
           <button id="tabSent" class="btn btn-light flex-1">Sent</button>
           <button id="tabRecv" class="btn btn-light flex-1">Received</button>
@@ -155,7 +146,7 @@
     import { getDatabase, ref as dbRef, set, onValue, off, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
     import { getStorage, ref as sRef, uploadBytesResumable, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
-    /* ----------------- Put your Firebase config here ----------------- */
+    /* ---------- REPLACE WITH YOUR FIREBASE CONFIG ---------- */
     const firebaseConfig = {
       apiKey: 'AIzaSyYOUR_KEY',
       authDomain: 'your-project.firebaseapp.com',
@@ -165,35 +156,28 @@
       messagingSenderId: '0000000000',
       appId: '1:0000000000:web:xxxxxxxxxxxxxx'
     };
-    /* ----------------------------------------------------------------- */
+    /* ------------------------------------------------------ */
 
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
     const storage = getStorage(app);
 
-    /* ---------------- UI shortcuts ---------------- */
     const $ = id => document.getElementById(id);
     const asMB = b => (b/1024/1024).toFixed(2)+' MB';
     const loader = $('loader'), showLoader = on => loader.style.display = on ? 'flex' : 'none';
 
-    /* ---------------- Dark mode ---------------- */
+    /* Dark mode */
     const DARK_KEY='rds-dark';
     function applyDark(on){ document.documentElement.classList.toggle('dark',on); document.body.classList.toggle('dark',on); $('darkToggle').textContent=on?'☀️ Light':'🌙 Dark'; localStorage.setItem(DARK_KEY,on?'1':'0') }
     $('darkToggle').addEventListener('click',()=>applyDark(!document.documentElement.classList.contains('dark')));
     (function(){ applyDark(localStorage.getItem(DARK_KEY)==='1') })();
 
-    /* ---------------- Toasts + Ding ---------------- */
+    /* Toasts */
     const ctx = new (window.AudioContext||window.webkitAudioContext)();
     function ding(){ try{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(.0001,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.25,ctx.currentTime+.02); g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.25); o.start(); o.stop(ctx.currentTime+.26) }catch(e){} }
-    function toast(type,title,msg){
-      const wrap=$('toasts'); const el=document.createElement('div');
-      el.className=`toast ${type==='ok'?'ok':type==='err'?'err':'info'} animate__animated animate__fadeInRight`;
-      el.innerHTML=`<div style="font-weight:800">${title}</div><div style="opacity:.95;margin-top:4px">${msg}</div>`;
-      wrap.appendChild(el); ding();
-      setTimeout(()=>{ el.classList.remove('animate__fadeInRight'); el.classList.add('animate__fadeOutRight'); setTimeout(()=>wrap.removeChild(el),600) }, 3000);
-    }
+    function toast(type,title,msg){ const wrap=$('toasts'); const el=document.createElement('div'); el.className=`toast ${type==='ok'?'ok':type==='err'?'err':'info'} animate__animated animate__fadeInRight`; el.innerHTML=`<div style="font-weight:800">${title}</div><div style="opacity:.95;margin-top:4px">${msg}</div>`; wrap.appendChild(el); ding(); setTimeout(()=>{ el.classList.remove('animate__fadeInRight'); el.classList.add('animate__fadeOutRight'); setTimeout(()=>wrap.removeChild(el),700) }, 3000) }
 
-    /* ---------------- History localStorage ---------------- */
+    /* History */
     const HSENT='rds-h-sent', HREC='rds-h-recv';
     function getH(k){ try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]} }
     function putH(k,a){ localStorage.setItem(k, JSON.stringify(a)) }
@@ -215,156 +199,159 @@
     $('clearHist').onclick=()=>{ localStorage.removeItem(HSENT); localStorage.removeItem(HREC); renderHist(); toast('ok','Cleared','History removed') }
     renderHist();
 
-    /* ---------------- Crypto helpers ---------------- */
+    /* ---------- Crypto helpers (clean) ---------- */
     async function hexSha256(buffer){
       const hash = await crypto.subtle.digest('SHA-256', buffer);
       const arr = Array.from(new Uint8Array(hash));
       return arr.map(b => b.toString(16).padStart(2,'0')).join('');
     }
+    function ab2b64(buf){
+      const bytes = new Uint8Array(buf);
+      let binary = '';
+      for (let i=0;i<bytes.length;i++) binary += String.fromCharCode(bytes[i]);
+      return btoa(binary);
+    }
+    function b64ToUint8Array(b64){
+      const binary = atob(b64);
+      const len = binary.length;
+      const arr = new Uint8Array(len);
+      for(let i=0;i<len;i++) arr[i]=binary.charCodeAt(i);
+      return arr;
+    }
 
-    async function deriveKey(pass, salt){
+    async function deriveKey(pass, saltUint8){
       const enc = new TextEncoder();
       const keyMat = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
-      return crypto.subtle.deriveKey({ name:'PBKDF2', salt, iterations:120000, hash:'SHA-256' }, keyMat, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+      return crypto.subtle.deriveKey({ name:'PBKDF2', salt: saltUint8, iterations:120000, hash:'SHA-256' }, keyMat, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
     }
-    function ab2b64(buf){ let binary=''; const bytes=new Uint8Array(buf); for(let i=0;i<bytes.length;i++) binary+=String.fromCharCode(bytes[i]); return btoa(binary) }
-    function b642ab(b64){ const binary=atob(b64); const buf=new ArrayBuffer(binary.length); const bytes=new Uint8Array(buf); for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i); return buf }
 
-    async function encryptBytes(bytes, pass){
+    // encrypt ArrayBuffer, returns { cipherBuffer (ArrayBuffer), ivB64, saltB64 }
+    async function encryptArrayBuffer(arrayBuffer, pass){
       const salt = crypto.getRandomValues(new Uint8Array(16));
       const iv = crypto.getRandomValues(new Uint8Array(12));
       const key = await deriveKey(pass, salt);
-      const cipher = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, bytes);
-      return { cipherB64: ab2b64(cipher), ivB64: ab2b64(iv), saltB64: ab2b64(salt) };
+      const cipher = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, arrayBuffer);
+      return { cipherBuffer: cipher, ivB64: ab2b64(iv.buffer), saltB64: ab2b64(salt.buffer) };
     }
 
-    async function decryptToBytes(cipherB64, pass, ivB64, saltB64){
-      const salt = new Uint8Array(b642ab(saltB64));
-      const iv = new Uint8Array(b642ab(ivB64));
+    // decrypt ArrayBuffer (cipherBuffer is ArrayBuffer), returns Uint8Array plaintext
+    async function decryptArrayBuffer(cipherBuffer, pass, ivB64, saltB64){
+      const iv = b64ToUint8Array(ivB64);
+      const salt = b64ToUint8Array(saltB64);
       const key = await deriveKey(pass, salt);
-      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, b642ab(cipherB64));
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, cipherBuffer);
       return new Uint8Array(plain);
     }
 
-    /* ---------------- Drag & Drop & Paste ---------------- */
+    /* ---------- Drag & Drop & Paste ---------- */
     const dz = $('dropzone');
     ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); dz.classList.add('drag') }));
     ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{ e.preventDefault(); dz.classList.remove('drag') }));
     dz.addEventListener('drop', e=>{ const f = e.dataTransfer.files?.[0]; if(f){ const dt = new DataTransfer(); dt.items.add(f); $('fileInput').files = dt.files; updateFileInfo(f); }});
     window.addEventListener('paste', e=>{ const f=[...e.clipboardData.items].find(i=>i.kind==='file')?.getAsFile(); if(f){ const dt=new DataTransfer(); dt.items.add(f); $('fileInput').files=dt.files; updateFileInfo(f); toast('ok','Pasted','File captured from clipboard') }});
 
-    /* ---------------- File info ---------------- */
+    /* ---------- File info ---------- */
     $('fileInput').addEventListener('change', e=>{ const f = e.target.files[0]; if(f) updateFileInfo(f) });
     function updateFileInfo(file){ $('fileInfo').textContent = `${file.name} • ${asMB(file.size)}` }
 
-    /* ---------------- Pre-fill receiver from URL ---------------- */
+    /* ---------- Pre-fill receiver from URL ---------- */
     (function(){ const q = new URL(window.location.href).searchParams.get('id'); if(q){ $('receiverId').value = q; toast('info','ID from URL', q); startReceive(q) }})();
 
-    /* ---------------- Utilities ---------------- */
+    /* ---------- Utilities ---------- */
     function randomId(n=8){ const s='abcdefghijklmnopqrstuvwxyz0123456789'; let r=''; for(let i=0;i<n;i++) r+=s[Math.floor(Math.random()*s.length)]; return r; }
     function copy(text){ navigator.clipboard.writeText(text).then(()=>toast('ok','Copied','Copied to clipboard')).catch(()=>toast('err','Copy Failed','Copy manually')) }
     function setShareLink(id){ const url=new URL(window.location.href); url.searchParams.set('id',id); $('shareLink').value = url.toString(); $('shareWrap').classList.remove('hidden'); $('qrcode').innerHTML=''; new QRCode('qrcode',{ text:url.toString(), width:140, height:140 }) }
 
-    /* ---------------- Optional image compression (fast) ---------------- */
-    async function compressImageIfNeeded(file, maxWidth = 1200, quality = 0.75){
+    /* ---------- Optional image compression (fast) ---------- */
+    async function compressImageIfNeeded(file, maxWidth = 1400, quality = 0.8){
       try{
         if(!file.type.startsWith('image/')) return file;
-        // createImageBitmap and OffscreenCanvas are fast
         const img = await createImageBitmap(file);
         const ratio = Math.min(1, maxWidth / img.width);
         const canvas = new OffscreenCanvas(Math.round(img.width*ratio), Math.round(img.height*ratio));
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         const blob = await canvas.convertToBlob({ type:'image/jpeg', quality });
-        if(blob.size < file.size){
-          return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type:'image/jpeg' });
-        }else return file;
+        if(blob.size < file.size) return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type:'image/jpeg' });
+        return file;
       }catch(e){
         return file;
       }
     }
 
-    /* ---------------- Sender actions & fast-storage upload ---------------- */
+    /* ---------- Sender: upload to Storage & write metadata ---------- */
     $('genId').onclick = ()=>{ const id=randomId(8); $('senderId').value=id; copy(id); setShareLink(id) };
     $('copyId').onclick = ()=>{ const id=$('senderId').value.trim(); if(!id) return toast('err','No ID','Generate or type an ID'); copy(id); setShareLink(id) };
     $('copyShare').onclick = ()=>{ const v=$('shareLink').value; if(!v) return toast('err','No Link','Share link not ready'); copy(v) };
 
-    let lastUploadTask = null;
     $('sendBtn').onclick = async () => {
-      const f = $('fileInput').files[0]; if(!f) return toast('err','File Missing','Please choose a file');
-      const MAX = 15 * 1024 * 1024; if(f.size > MAX) return toast('err','Too Large', `Please upload ≤ ${ (MAX/1024/1024).toFixed(0) } MB`);
-      showLoader(true);
-      $('progress').style.width = '4%'; $('progressLabel').textContent = 'Preparing...'; $('est').textContent = 'ETA: --'; $('status').textContent = '';
+      const fOrig = $('fileInput').files[0]; if(!fOrig) return toast('err','File Missing','Please choose a file');
+      const MAX = 15 * 1024 * 1024; if(fOrig.size > MAX) return toast('err','Too Large', `Please upload ≤ ${ (MAX/1024/1024).toFixed(0) } MB`);
+      showLoader(true); $('progress').style.width='4%'; $('progressLabel').textContent='Preparing...'; $('est').textContent='ETA: --'; $('status').textContent='';
 
       try{
-        // compress images quickly (optional)
-        const compressed = await compressImageIfNeeded(f, 1400, 0.78);
-        const file = compressed;
+        // compress images optionally
+        const f = await compressImageIfNeeded(fOrig, 1400, 0.8);
+
         const id = $('senderId').value.trim() || randomId(8); $('senderId').value = id;
         const pass = $('passphrase').value.trim();
         const expiryMs = parseInt($('expiry').value,10) || 86400000;
         const oneTime = !!$('oneTime').checked;
 
-        // compute SHA-256
+        // compute sha
         $('status').textContent = 'Hashing...';
-        const ab = await file.arrayBuffer();
+        const ab = await f.arrayBuffer();
         const sha = await hexSha256(ab);
 
-        // if encryption requested: encrypt bytes and create Blob
-        let uploadBlob = file;
+        // if encryption requested, encrypt arrayBuffer -> cipherBuffer + iv/salt
+        let uploadBuffer = ab;
         let encMeta = null;
         if(pass){
           $('status').textContent = 'Encrypting (client)...';
-          const encRes = await encryptBytes(new Uint8Array(ab), pass);
-          // store encrypted payload as binary: convert base64 back to ArrayBuffer
-          const cipherBuf = b642ab(encRes.cipherB64); // ArrayBuffer
-          uploadBlob = new Blob([cipherBuf], { type: 'application/octet-stream' });
+          const encRes = await encryptArrayBuffer(ab, pass); // cipherBuffer (ArrayBuffer)
+          uploadBuffer = encRes.cipherBuffer;
           encMeta = { ivB64: encRes.ivB64, saltB64: encRes.saltB64 };
         }
 
-        // storage ref
-        const path = `files/${id}/${Date.now()}_${encodeURIComponent(file.name)}`;
+        // storage path
+        const path = `files/${id}/${Date.now()}_${encodeURIComponent(f.name)}`;
         const sref = sRef(storage, path);
 
-        // start resumable upload
-        const metadata = { contentType: uploadBlob.type || file.type, customMetadata: { sha } };
-        $('status').textContent = 'Uploading...';
-        const uploadTask = uploadBytesResumable(sref, uploadBlob, metadata);
-        lastUploadTask = uploadTask;
+        // Start resumable upload of a Blob
+        const blob = new Blob([uploadBuffer], { type: 'application/octet-stream' });
+        const metadata = { contentType: f.type || 'application/octet-stream', customMetadata: { sha } };
 
-        const startTime = Date.now();
-        let lastTransferred = 0;
+        $('status').textContent = 'Uploading...';
+        const uploadTask = uploadBytesResumable(sref, blob, metadata);
+
+        const start = Date.now();
         uploadTask.on('state_changed',
-          (snapshot) => {
+          snapshot => {
             const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
             $('progress').style.width = pct + '%';
             $('progressLabel').textContent = pct + '%';
-            // simple ETA estimator:
-            const now = Date.now();
-            const elapsed = (now - startTime) / 1000; // seconds
-            const speed = snapshot.bytesTransferred / Math.max(elapsed, 0.2); // bytes/sec
-            const remainingBytes = snapshot.totalBytes - snapshot.bytesTransferred;
-            const eta = remainingBytes / (speed || 1);
-            $('est').textContent = `ETA: ${eta < 60 ? Math.round(eta) + 's' : Math.round(eta/60)+'m'}`;
-            lastTransferred = snapshot.bytesTransferred;
+            const elapsed = Math.max(1, (Date.now() - start) / 1000);
+            const speed = snapshot.bytesTransferred / elapsed; // bytes/sec
+            const remaining = snapshot.totalBytes - snapshot.bytesTransferred;
+            const etaSec = Math.round(remaining / Math.max(speed, 1));
+            $('est').textContent = `ETA: ${etaSec < 60 ? etaSec + 's' : Math.round(etaSec/60) + 'm'}`;
           },
-          (err) => {
-            console.error('Upload error', err);
-            toast('err','Upload failed', err.message || 'Error during upload');
+          err => {
+            console.error('upload error', err);
+            toast('err','Upload failed', err.message || 'Error');
             showLoader(false);
           },
           async () => {
-            // complete
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            // metadata to write in RTDB (small)
+            // metadata small write
             const meta = {
-              name: file.name,
-              size: file.size,
+              name: f.name,
+              size: f.size,
               sha,
               url: downloadURL,
               storagePath: path,
               enc: !!pass,
-              encMeta: encMeta || null,
+              encMeta: encMeta,
               time: new Date().toISOString(),
               expiresAt: Date.now() + expiryMs,
               oneTime: !!oneTime
@@ -372,10 +359,10 @@
             await set(dbRef(db, 'files/' + id), meta);
 
             $('progress').style.width = '100%'; $('progressLabel').textContent = '100%';
-            $('status').innerHTML = `✅ <b>${file.name}</b> sent with ID: <b>${id}</b>`;
+            $('status').innerHTML = `✅ <b>${f.name}</b> sent with ID: <b>${id}</b>`;
             setShareLink(id);
-            toast('ok','Upload successful', `ID: ${id} — ready to share`);
-            addSent({ id, name: file.name, time: new Date().toLocaleString(), size: asMB(file.size), link: location.origin + location.pathname + '?id=' + id, enc: !!pass });
+            toast('ok','Upload successful', `ID: ${id}`);
+            addSent({ id, name: f.name, time: new Date().toLocaleString(), size: asMB(f.size), link: location.origin + location.pathname + '?id=' + id, enc: !!pass });
             showLoader(false);
           }
         );
@@ -387,12 +374,13 @@
       }
     };
 
-    /* ---------------- Receiver actions ---------------- */
+    /* ---------- Receiver: listen metadata, download & decrypt ---------- */
     $('openBtn').onclick = ()=>{ const id = $('receiverId').value.trim(); if(!id) return toast('err','ID Missing','Type an ID first'); startReceive(id) };
 
     let currentRef = null;
     async function startReceive(id){
-      const box = $('receiveBox'); box.innerHTML = `<div class="text-sm opacity-80">⏳ Listening for <b>${id}</b>...</div>`;
+      const box = $('receiveBox');
+      box.innerHTML = `<div class="text-sm opacity-80">⏳ Listening for <b>${id}</b>...</div>`;
       if(currentRef) off(currentRef);
       currentRef = dbRef(db, 'files/' + id);
       onValue(currentRef, async snap => {
@@ -406,25 +394,18 @@
 
         const pass = $('recvPass').value.trim();
 
-        async function downloadAndHandle(){
+        async function fetchAndReturnPlain(){
           try{
-            $('status').textContent = 'Preparing download…';
-            // If encrypted: we must download binary then decrypt client-side using encMeta
+            // fetch binary
+            const resp = await fetch(data.url);
+            const ab = await resp.arrayBuffer();
             if(data.enc){
-              if(!pass) { toast('err','Passphrase required','Enter passphrase to decrypt'); return null; }
-              // fetch binary
-              const resp = await fetch(data.url);
-              const arrBuf = await resp.arrayBuffer();
+              if(!pass){ toast('err','Passphrase required','Enter passphrase to decrypt'); return null; }
               // decrypt
-              const plainBytes = await decryptToBytes(btoa(String.fromCharCode(...new Uint8Array(arrBuf))), pass, data.encMeta.ivB64, data.encMeta.saltB64)
-              // plainBytes is Uint8Array — create blob
-              const blob = new Blob([plainBytes]);
-              return { blob, name: data.name };
+              const plainBytes = await decryptArrayBuffer(ab, pass, data.encMeta.ivB64, data.encMeta.saltB64);
+              return { bytes: plainBytes, name: data.name };
             }else{
-              // not encrypted: download a direct URL (data stored in Storage)
-              const resp = await fetch(data.url);
-              const blob = await resp.blob();
-              return { blob, name: data.name };
+              return { bytes: new Uint8Array(ab), name: data.name };
             }
           }catch(e){
             console.error(e);
@@ -435,26 +416,27 @@
 
         $('dl').onclick = async (ev) => {
           ev.preventDefault();
-          const res = await downloadAndHandle();
+          const res = await fetchAndReturnPlain();
           if(!res) return;
-          const url = URL.createObjectURL(res.blob);
-          const a = document.createElement('a'); a.href = url; a.download = res.name || 'download'; document.body.appendChild(a); a.click(); a.remove();
-          URL.revokeObjectURL(url);
+          const blob = new Blob([res.bytes]);
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = res.name || 'download'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
           toast('ok','Download successful','File downloaded');
           addRecv({ id, name: data.name, time: new Date().toLocaleString(), link: location.origin + location.pathname + '?id=' + id, enc: !!data.enc });
-          // if oneTime: remove db meta and storage object
+
+          // one-time cleanup: remove DB meta and delete storage object (best-effort)
           if(data.oneTime){
             try{
               await remove(currentRef);
-              // delete storage object (best-effort)
               const deleteRef = sRef(storage, data.storagePath);
-              await deleteObject(deleteRef).catch(()=>{ /* ignore */ });
+              await deleteObject(deleteRef).catch(()=>{ /* ignore delete errors */ });
               toast('info','One-time','Link removed after download');
             }catch(e){ console.error('one-time cleanup failed', e) }
           }
         };
 
         $('copyLink').onclick = ()=>{ copy(data.url) };
+
         $('verifyBtn').onclick = async ()=>{
           try{
             $('verifyOut').textContent = 'Verifying…';
@@ -463,41 +445,29 @@
             let bytes;
             if(data.enc){
               if(!pass){ toast('err','Passphrase required','Enter passphrase'); $('verifyOut').textContent=''; return; }
-              bytes = await decryptToBytes(btoa(String.fromCharCode(...new Uint8Array(ab))), pass, data.encMeta.ivB64, data.encMeta.saltB64);
+              bytes = await decryptArrayBuffer(ab, pass, data.encMeta.ivB64, data.encMeta.saltB64);
             }else bytes = new Uint8Array(ab);
             const h = await hexSha256(bytes.buffer);
             $('verifyOut').textContent = h === data.sha ? '✅ Hash verified (SHA-256 matches)' : '❌ Hash mismatch';
-          }catch(e){ $('verifyOut').textContent = '❌ Verification error'; console.error(e) }
+          }catch(e){
+            console.error(e);
+            $('verifyOut').textContent = '❌ Verification error';
+          }
         };
+
       });
     }
 
-    /* ---------------- Keyboard shortcut ---------------- */
+    /* ---------- Shortcuts ---------- */
     window.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='i'){ e.preventDefault(); $('senderId').focus(); } });
-
-    /* ---------------- Helper: base64 arrayBuffer for decrypt helper (used earlier) ---------------- */
-    function b642ab_raw(b64){
-      const binary = atob(b64);
-      const len = binary.length;
-      const bytes = new Uint8Array(len);
-      for(let i=0;i<len;i++) bytes[i] = binary.charCodeAt(i);
-      return bytes.buffer;
-    }
-
-    // small helper wrapper used in decryptToBytes earlier (we sent base64 string)
-    function b642ab(b64){
-      // if input is ArrayBuffer-like already, return it
-      try{ return b642ab_raw(b64); }catch(e){ return b642ab_raw(b64) }
-    }
 
   </script>
 
-  <!-- Notes & production tips:
-    1) Replace firebaseConfig placeholders with your project's real values.
-    2) Set Realtime DB + Storage rules to secure before production.
-    3) For guaranteed cleanup of expired items, add a Cloud Function / scheduled job to delete expired storage blobs and DB metadata.
-    4) Encryption is optional; it adds CPU time. Use for extra privacy.
-    5) For consistent 5s target: encourage file sizes <= ~3MB and good upstream bandwidth.
+  <!-- Production notes:
+   1) Replace firebaseConfig with real values.
+   2) Set secure rules for database and storage.
+   3) Use a Cloud Function to periodically delete expired items if you want server-side cleanup.
+   4) For consistent 5s target, advise users to upload small files (<= ~3MB) and use good network.
   -->
 </body>
 </html>
