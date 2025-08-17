@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Realtime Data Sender/Receiver</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
+
+  <!-- Firebase v8 CDN -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- TailwindCSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"></script>
+  <!-- Animate.css -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
 </head>
 <body class="bg-gradient-to-r from-purple-500 to-indigo-600 min-h-screen flex items-center justify-center p-4">
 
@@ -40,16 +45,16 @@
     const firebaseConfig = {
       apiKey: "AIzaSyCORHcQUhCy3baKfG9znXHoQygNxgECNMo",
       authDomain: "sender-d6c0a.firebaseapp.com",
+      databaseURL: "https://sender-d6c0a-default-rtdb.firebaseio.com/",
       projectId: "sender-d6c0a",
-      storageBucket: "sender-d6c0a.firebasestorage.app",
+      storageBucket: "sender-d6c0a.appspot.com",
       messagingSenderId: "19479079444",
       appId: "1:19479079444:web:4b5e80bd20d6d07d73d501",
-      measurementId: "G-PBPGRJ0JEY",
-      databaseURL: "https://sender-d6c0a-default-rtdb.firebaseio.com/"
+      measurementId: "G-PBPGRJ0JEY"
     };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     // Send Data
