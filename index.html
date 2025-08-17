@@ -208,6 +208,58 @@
 
     </div>
   </div>
+<script>
+  // 🔹 Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyXXXXXXX",
+    authDomain: "sender-d6c0a.firebaseapp.com",
+    databaseURL: "https://sender-d6c0a-default-rtdb.firebaseio.com",
+    projectId: "sender-d6c0a",
+    storageBucket: "sender-d6c0a.appspot.com",
+    messagingSenderId: "19479079444",
+    appId: "1:19479079444:web:abcdefg123456",
+    measurementId: "G-XXXXXXX"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // 🔹 Send Data
+  function sendData() {
+    const id = document.getElementById("senderId").value.trim();
+    const file = document.getElementById("fileInput").files[0];
+    const statusBox = document.getElementById("sendStatus");
+
+    if (!id || !file) {
+      alert("⚠️ Please enter ID and choose a file!");
+      return;
+    }
+
+    // ✅ File size limit = 12MB
+    const maxSize = 12 * 1024 * 1024; // 12 MB in bytes
+    if (file.size > maxSize) {
+      alert("❌ File size limit exceeded! (Max 12 MB allowed)");
+      return;
+    }
+
+    statusBox.innerHTML = "⏳ Uploading file...";
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const base64Data = e.target.result;
+      db.ref("files/" + id).set({
+        name: file.name,
+        data: base64Data,
+        time: new Date().toLocaleString()
+      }).then(() => {
+        statusBox.innerHTML = `✅ File <b>${file.name}</b> sent successfully with ID: <b>${id}</b>`;
+      }).catch(err => {
+        statusBox.innerHTML = "❌ Error: " + err.message;
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+</script>
 
   <script>
     /* ---------------- Firebase Config: PUT REAL VALUES ---------------- */
@@ -407,3 +459,4 @@
   </script>
 </body>
 </html>
+
