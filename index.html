@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Realtime Data Share</title>
+  <title>⚡ Realtime Data Share</title>
 
   <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -12,20 +12,71 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <!-- Animate.css -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+    }
+    .floating-bg {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      filter: blur(150px);
+      opacity: 0.7;
+      z-index: 0;
+      animation: float 8s infinite alternate ease-in-out;
+    }
+    .bg1 { background: #a78bfa; top: 10%; left: 15%; }
+    .bg2 { background: #f472b6; bottom: 15%; right: 10%; animation-delay: 3s; }
+    @keyframes float {
+      from { transform: translateY(0px) scale(1); }
+      to { transform: translateY(-40px) scale(1.05); }
+    }
+    .glow-btn {
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+    }
+    .glow-btn:hover {
+      box-shadow: 0 0 35px rgba(99, 102, 241, 0.9);
+      transform: scale(1.05);
+    }
+    .progress-bar {
+      height: 8px;
+      background: linear-gradient(90deg, #6366f1, #ec4899);
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center p-6">
 
-  <div class="backdrop-blur-lg bg-white/30 shadow-2xl rounded-3xl w-full max-w-5xl p-10 animate__animated animate__fadeIn">
-    <h1 class="text-4xl font-extrabold text-center text-white drop-shadow mb-10">⚡ Realtime Data Share</h1>
+<body class="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 min-h-screen flex items-center justify-center p-6">
 
-    <div class="grid md:grid-cols-2 gap-10">
+  <!-- Floating Background Blobs -->
+  <div class="floating-bg bg1"></div>
+  <div class="floating-bg bg2"></div>
+
+  <!-- Main Container -->
+  <div class="relative backdrop-blur-lg bg-white/20 shadow-2xl rounded-3xl w-full max-w-6xl p-12 animate__animated animate__fadeIn">
+    <h1 class="text-5xl font-extrabold text-center text-white drop-shadow mb-10" style="font-family: 'Montserrat', sans-serif;">
+      ⚡ Realtime Data Share
+    </h1>
+
+    <div class="grid md:grid-cols-2 gap-10 relative z-10">
 
       <!-- Sender Section -->
       <div class="p-6 rounded-2xl bg-white/70 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
         <h2 class="text-2xl font-bold text-purple-700 mb-5 flex items-center gap-2">📤 Sender</h2>
         <input type="text" id="senderId" placeholder="Enter Custom ID" class="w-full border rounded-lg p-3 mb-4 focus:ring-2 focus:ring-purple-500">
         <input type="file" id="fileInput" class="w-full mb-4 text-gray-700">
-        <button onclick="sendData()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition">🚀 Send</button>
+        <button onclick="sendData()" class="glow-btn w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition">🚀 Send</button>
+        <div class="mt-4">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
         <p id="sendStatus" class="mt-4 text-sm text-gray-800"></p>
       </div>
 
@@ -33,7 +84,7 @@
       <div class="p-6 rounded-2xl bg-white/70 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
         <h2 class="text-2xl font-bold text-green-700 mb-5 flex items-center gap-2">📥 Receiver</h2>
         <input type="text" id="receiverId" placeholder="Enter ID to Receive" class="w-full border rounded-lg p-3 mb-4 focus:ring-2 focus:ring-green-500">
-        <button onclick="receiveData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition">🔍 Open</button>
+        <button onclick="receiveData()" class="glow-btn w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition">🔍 Open</button>
         <div id="receiveBox" class="mt-5"></div>
       </div>
 
@@ -41,7 +92,7 @@
   </div>
 
   <script>
-    // 🔹 Firebase Config (replace with your real values)
+    // 🔹 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyXXXXXXX",
       authDomain: "sender-d6c0a.firebaseapp.com",
@@ -62,6 +113,7 @@
       const id = document.getElementById("senderId").value.trim();
       const file = document.getElementById("fileInput").files[0];
       const statusBox = document.getElementById("sendStatus");
+      const progressBar = document.getElementById("progressBar");
 
       if (!id || !file) {
         alert("⚠️ Please enter ID and choose a file!");
@@ -69,8 +121,16 @@
       }
 
       statusBox.innerHTML = "⏳ Uploading file...";
+      progressBar.style.width = "0%";
 
       const reader = new FileReader();
+      reader.onloadstart = () => { progressBar.style.width = "10%"; };
+      reader.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + "%";
+        }
+      };
       reader.onload = function(e) {
         const base64Data = e.target.result;
         db.ref("files/" + id).set({
@@ -79,6 +139,7 @@
           time: new Date().toLocaleString()
         }).then(() => {
           statusBox.innerHTML = `✅ File <b>${file.name}</b> sent successfully with ID: <b>${id}</b>`;
+          progressBar.style.width = "100%";
         }).catch(err => {
           statusBox.innerHTML = "❌ Error: " + err.message;
         });
@@ -101,14 +162,14 @@
         const data = snapshot.val();
         if (data) {
           box.innerHTML = `
-            <div class="p-4 bg-white/80 rounded-xl shadow">
+            <div class="p-4 bg-white/90 rounded-xl shadow animate__animated animate__fadeInUp">
               <p class="text-gray-800 mb-2">📄 File: <b>${data.name}</b></p>
               <p class="text-sm text-gray-600 mb-3">⏱ Sent: ${data.time}</p>
               <a href="${data.data}" download="${data.name}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-block">⬇ Download</a>
             </div>
           `;
         } else {
-          box.innerHTML = "<p class='text-red-600 font-semibold'>❌ No file found for this ID</p>";
+          box.innerHTML = "<p class='text-red-600 font-semibold animate__animated animate__shakeX'>❌ No file found for this ID</p>";
         }
       });
     }
