@@ -1,98 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>⚡ Realtime Data Share</title>
 
   <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-  <!-- Tailwind CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Tailwind (stable) -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   <!-- Animate.css -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet"/>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      overflow-x: hidden;
+    :root{
+      --primary:#6366f1; /* indigo-500 */
+      --accent:#ec4899;  /* pink-500 */
+      --success:#10b981; /* emerald-500 */
+      --danger:#ef4444;  /* red-500 */
     }
-    .floating-bg {
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      filter: blur(150px);
-      opacity: 0.7;
-      z-index: 0;
-      animation: float 8s infinite alternate ease-in-out;
+    body{ font-family:'Poppins',sans-serif; overflow-x:hidden; }
+
+    /* Floating neon blobs */
+    .floating-bg{ position:absolute;width:320px;height:320px;border-radius:50%;filter:blur(140px);opacity:.7;z-index:0;
+      animation:float 8s infinite alternate ease-in-out }
+    .bg1{ background:#a78bfa; top:8%; left:10% }
+    .bg2{ background:#f472b6; bottom:10%; right:8%; animation-delay:2.5s }
+    @keyframes float{ from{ transform:translateY(0) scale(1)} to{ transform:translateY(-40px) scale(1.05)} }
+
+    /* Glow buttons */
+    .glow-btn{ transition:all .25s ease; box-shadow:0 0 18px rgba(99,102,241,.45) }
+    .glow-btn:hover{ transform:translateY(-1px) scale(1.02); box-shadow:0 0 28px rgba(99,102,241,.8) }
+
+    /* Fancy focus */
+    .f-input:focus{ outline:none; box-shadow:0 0 0 3px rgba(99,102,241,.3); border-color:var(--primary) }
+
+    /* Progress bar */
+    .progress{ height:8px; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:12px; width:0%; transition:width .25s ease }
+
+    /* Toasts */
+    .toast-wrap{ position:fixed; top:14px; right:14px; z-index:9999; display:flex; flex-direction:column; gap:10px }
+    .toast{ min-width:240px; max-width:360px; padding:12px 14px; border-radius:12px; color:#fff; display:flex; align-items:flex-start; gap:10px;
+      backdrop-filter:blur(10px); box-shadow:0 10px 24px rgba(0,0,0,.15) }
+    .toast-success{ background:linear-gradient(135deg,#34d399,#10b981) }
+    .toast-error{ background:linear-gradient(135deg,#f87171,#ef4444) }
+    .toast-info{ background:linear-gradient(135deg,#60a5fa,#3b82f6) }
+    .toast .title{ font-weight:700; margin-bottom:2px }
+    .toast .msg{ font-size:.9rem; opacity:.95 }
+
+    /* Shimmer for cards */
+    .card{ position:relative; overflow:hidden }
+    .card::after{
+      content:""; position:absolute; inset:-150% -150% auto auto; width:200%; height:200%;
+      background:conic-gradient(from 180deg at 50% 50%, rgba(99,102,241,.15), rgba(236,72,153,.15), transparent, transparent);
+      animation:spin 14s linear infinite; pointer-events:none
     }
-    .bg1 { background: #a78bfa; top: 10%; left: 15%; }
-    .bg2 { background: #f472b6; bottom: 15%; right: 10%; animation-delay: 3s; }
-    @keyframes float {
-      from { transform: translateY(0px) scale(1); }
-      to { transform: translateY(-40px) scale(1.05); }
-    }
-    .glow-btn {
-      transition: all 0.3s ease-in-out;
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
-    }
-    .glow-btn:hover {
-      box-shadow: 0 0 35px rgba(99, 102, 241, 0.9);
-      transform: scale(1.05);
-    }
-    .progress-bar {
-      height: 8px;
-      background: linear-gradient(90deg, #6366f1, #ec4899);
-      border-radius: 10px;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
+    @keyframes spin{ to{ transform:rotate(360deg) } }
+
+    /* Tiny badge */
+    .badge{ font-size:.75rem; padding:.2rem .5rem; border-radius:999px }
   </style>
 </head>
 
-<body class="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 min-h-screen flex items-center justify-center p-6">
+<body class="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 min-h-screen flex items-center justify-center p-6">
 
-  <!-- Floating Background Blobs -->
+  <!-- Floating Background -->
   <div class="floating-bg bg1"></div>
   <div class="floating-bg bg2"></div>
 
-  <!-- Main Container -->
-  <div class="relative backdrop-blur-lg bg-white/20 shadow-2xl rounded-3xl w-full max-w-6xl p-12 animate__animated animate__fadeIn">
-    <h1 class="text-5xl font-extrabold text-center text-white drop-shadow mb-10" style="font-family: 'Montserrat', sans-serif;">
-      ⚡ Realtime Data Share
-    </h1>
+  <!-- Toast container -->
+  <div id="toasts" class="toast-wrap"></div>
 
-    <div class="grid md:grid-cols-2 gap-10 relative z-10">
+  <!-- Main -->
+  <div class="relative backdrop-blur-lg bg-white/20 shadow-2xl rounded-3xl w-full max-w-6xl p-8 md:p-12 animate__animated animate__fadeIn">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl md:text-5xl font-extrabold text-white drop-shadow" style="font-family:'Montserrat',sans-serif">
+        ⚡ Realtime Data Share
+      </h1>
+      <span class="badge bg-white/30 text-white">No Auth • Demo</span>
+    </div>
 
-      <!-- Sender Section -->
-      <div class="p-6 rounded-2xl bg-white/70 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-        <h2 class="text-2xl font-bold text-purple-700 mb-5 flex items-center gap-2">📤 Sender</h2>
-        <input type="text" id="senderId" placeholder="Enter Custom ID" class="w-full border rounded-lg p-3 mb-4 focus:ring-2 focus:ring-purple-500">
-        <input type="file" id="fileInput" class="w-full mb-4 text-gray-700">
-        <button onclick="sendData()" class="glow-btn w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition">🚀 Send</button>
-        <div class="mt-4">
-          <div id="progressBar" class="progress-bar"></div>
+    <div class="grid md:grid-cols-2 gap-8 md:gap-10 relative z-10">
+
+      <!-- Sender -->
+      <div class="card p-6 rounded-2xl bg-white/75 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
+        <h2 class="text-2xl font-bold text-purple-700 mb-4 flex items-center gap-2">📤 Sender</h2>
+
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Custom ID (optional)</label>
+        <div class="flex gap-2 mb-4">
+          <input id="senderId" type="text" placeholder="Enter ID or leave blank"
+                 class="f-input flex-1 border rounded-lg p-3" />
+          <button id="genIdBtn" class="px-3 py-2 rounded-lg bg-indigo-600 text-white glow-btn">Generate</button>
+          <button id="copyIdBtn" class="px-3 py-2 rounded-lg bg-indigo-100 text-indigo-700">Copy</button>
         </div>
-        <p id="sendStatus" class="mt-4 text-sm text-gray-800"></p>
+
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Select file (≤ 5 MB)</label>
+        <input id="fileInput" type="file" class="w-full mb-4 text-gray-700" />
+
+        <button id="sendBtn" onclick="sendData()"
+                class="glow-btn w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+          <span>🚀 Send</span>
+        </button>
+
+        <div class="mt-4"><div id="progressBar" class="progress"></div></div>
+        <p id="sendStatus" class="mt-3 text-sm text-gray-800"></p>
+
+        <div id="shareBox" class="mt-4 hidden">
+          <p class="text-sm text-gray-700 mb-2">Share link for receiver:</p>
+          <div class="flex gap-2">
+            <input id="shareLink" type="text" readonly class="f-input flex-1 border rounded-lg p-3 bg-white" />
+            <button id="copyShareBtn" class="px-3 py-2 rounded-lg bg-blue-600 text-white glow-btn">Copy Link</button>
+          </div>
+        </div>
       </div>
 
-      <!-- Receiver Section -->
-      <div class="p-6 rounded-2xl bg-white/70 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-        <h2 class="text-2xl font-bold text-green-700 mb-5 flex items-center gap-2">📥 Receiver</h2>
-        <input type="text" id="receiverId" placeholder="Enter ID to Receive" class="w-full border rounded-lg p-3 mb-4 focus:ring-2 focus:ring-green-500">
-        <button onclick="receiveData()" class="glow-btn w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition">🔍 Open</button>
-        <div id="receiveBox" class="mt-5"></div>
+      <!-- Receiver -->
+      <div class="card p-6 rounded-2xl bg-white/75 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
+        <h2 class="text-2xl font-bold text-green-700 mb-4 flex items-center gap-2">📥 Receiver</h2>
+
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Enter ID to receive</label>
+        <div class="flex gap-2 mb-4">
+          <input id="receiverId" type="text" placeholder="ID to receive"
+                 class="f-input flex-1 border rounded-lg p-3" />
+          <button onclick="receiveData()"
+                  class="glow-btn px-4 py-3 rounded-lg bg-green-600 text-white font-semibold">🔍 Open</button>
+        </div>
+
+        <div id="receiveBox" class="mt-3"></div>
       </div>
 
     </div>
   </div>
 
   <script>
-    // 🔹 Firebase Config
+    // ======== Firebase Config (put your real values) ========
     const firebaseConfig = {
       apiKey: "AIzaSyXXXXXXX",
       authDomain: "sender-d6c0a.firebaseapp.com",
@@ -104,19 +150,96 @@
       measurementId: "G-XXXXXXX"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 🔹 Send Data
-    function sendData() {
-      const id = document.getElementById("senderId").value.trim();
-      const file = document.getElementById("fileInput").files[0];
-      const statusBox = document.getElementById("sendStatus");
-      const progressBar = document.getElementById("progressBar");
+    // ======== Helpers ========
+    const $ = (id)=>document.getElementById(id);
 
-      if (!id || !file) {
-        alert("⚠️ Please enter ID and choose a file!");
+    function randomId(len=8){
+      // URL-safe ID: a-z0-9
+      const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+      let out = "";
+      for(let i=0;i<len;i++){ out += chars[Math.floor(Math.random()*chars.length)] }
+      return out;
+    }
+
+    function showToast(type, title, msg){
+      const wrap = $("toasts");
+      const el = document.createElement("div");
+      el.className = `toast ${type==='error'?'toast-error':type==='success'?'toast-success':'toast-info'} animate__animated animate__fadeInRight`;
+      el.innerHTML = `
+        <div>
+          <div class="title">${title}</div>
+          <div class="msg">${msg}</div>
+        </div>
+      `;
+      wrap.appendChild(el);
+      setTimeout(()=>{
+        el.classList.remove("animate__fadeInRight");
+        el.classList.add("animate__fadeOutRight");
+        setTimeout(()=>wrap.removeChild(el), 600);
+      }, 2600);
+    }
+
+    function copyText(txt){
+      navigator.clipboard.writeText(txt).then(()=>showToast('success','Copied','Text copied to clipboard'))
+        .catch(()=>showToast('error','Copy Failed','Please copy manually'));
+    }
+
+    function setShareLink(id){
+      const url = new URL(window.location.href);
+      url.searchParams.set('id', id);
+      $("shareLink").value = url.toString();
+      $("shareBox").classList.remove("hidden");
+    }
+
+    // ======== Pre-fill receiver from URL ?id=XXXX ========
+    (function(){
+      const url = new URL(window.location.href);
+      const qid = url.searchParams.get('id');
+      if(qid){
+        $("receiverId").value = qid;
+        receiveData(); // auto listen
+        showToast('info','Auto-fill','Receiver ID set from URL');
+      }
+    })();
+
+    // ======== Sender ID Buttons ========
+    $("genIdBtn").addEventListener("click", ()=>{
+      const id = randomId(8);
+      $("senderId").value = id;
+      copyText(id);
+      setShareLink(id);
+    });
+    $("copyIdBtn").addEventListener("click", ()=>{
+      const id = $("senderId").value.trim();
+      if(!id){ showToast('error','No ID','Generate or enter an ID'); return; }
+      copyText(id);
+      setShareLink(id);
+    });
+    $("copyShareBtn").addEventListener("click", ()=>{
+      const link = $("shareLink").value;
+      if(!link){ showToast('error','No Link','Share link not ready'); return; }
+      copyText(link);
+    });
+
+    // ======== Send Data ========
+    function sendData(){
+      const idInput = $("senderId").value.trim();
+      const id = idInput || randomId(8);      // Auto-generate if empty
+      if(!idInput) $("senderId").value = id;  // put back into input
+
+      const file = $("fileInput").files[0];
+      const statusBox = $("sendStatus");
+      const progressBar = $("progressBar");
+
+      if(!file){ showToast('error','File Missing','Please choose a file'); return; }
+
+      // Soft size limit ~5MB raw (~6.6MB base64)
+      const MAX = 5 * 1024 * 1024; // 5MB
+      if(file.size > MAX){
+        showToast('error','Too Large','Please upload ≤ 5 MB file');
         return;
       }
 
@@ -124,56 +247,74 @@
       progressBar.style.width = "0%";
 
       const reader = new FileReader();
-      reader.onloadstart = () => { progressBar.style.width = "10%"; };
-      reader.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + "%";
+      reader.onloadstart = ()=>{ progressBar.style.width = "10%"; };
+      reader.onprogress = (e)=>{
+        if(e.lengthComputable){
+          const pct = Math.round((e.loaded/e.total)*100);
+          progressBar.style.width = pct + "%";
         }
       };
-      reader.onload = function(e) {
+      reader.onload = function(e){
         const base64Data = e.target.result;
-        db.ref("files/" + id).set({
+
+        db.ref("files/"+id).set({
           name: file.name,
           data: base64Data,
           time: new Date().toLocaleString()
-        }).then(() => {
-          statusBox.innerHTML = `✅ File <b>${file.name}</b> sent successfully with ID: <b>${id}</b>`;
+        }).then(()=>{
+          statusBox.innerHTML = `✅ <b>${file.name}</b> sent with ID: <b>${id}</b>`;
           progressBar.style.width = "100%";
-        }).catch(err => {
+          setShareLink(id);
+          showToast('success','Sent Successfully',`ID: ${id}`);
+        }).catch(err=>{
           statusBox.innerHTML = "❌ Error: " + err.message;
+          showToast('error','Send Failed', err.message);
         });
       };
       reader.readAsDataURL(file);
     }
 
-    // 🔹 Receive Data
-    function receiveData() {
-      const id = document.getElementById("receiverId").value.trim();
-      if (!id) {
-        alert("⚠️ Please enter an ID to receive data!");
-        return;
-      }
+    // ======== Receive Data (live) ========
+    let currentRef = null;
+    function receiveData(){
+      const id = $("receiverId").value.trim();
+      const box = $("receiveBox");
+      if(!id){ showToast('error','ID Missing','Enter an ID first'); return; }
 
-      const box = document.getElementById("receiveBox");
-      box.innerHTML = "⏳ Fetching data...";
+      box.innerHTML = "⏳ Listening for data...";
+      if(currentRef){ currentRef.off(); } // remove previous listener
 
-      db.ref("files/" + id).on("value", snapshot => {
-        const data = snapshot.val();
-        if (data) {
+      currentRef = db.ref("files/"+id);
+      currentRef.on("value", snap=>{
+        const data = snap.val();
+        if(data){
+          const downloadLink = data.data;
+          const fileName = data.name || "download";
+
           box.innerHTML = `
             <div class="p-4 bg-white/90 rounded-xl shadow animate__animated animate__fadeInUp">
-              <p class="text-gray-800 mb-2">📄 File: <b>${data.name}</b></p>
-              <p class="text-sm text-gray-600 mb-3">⏱ Sent: ${data.time}</p>
-              <a href="${data.data}" download="${data.name}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-block">⬇ Download</a>
+              <p class="text-gray-800 mb-1">📄 <b>${fileName}</b></p>
+              <p class="text-xs text-gray-500 mb-3">⏱ ${data.time}</p>
+              <div class="flex gap-2">
+                <a id="dlBtn" href="${downloadLink}" download="${fileName}"
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center justify-center">⬇ Download</a>
+                <button id="copyDl" class="px-3 py-2 rounded-lg bg-indigo-100 text-indigo-700">Copy Link</button>
+              </div>
             </div>
           `;
-        } else {
+
+          $("dlBtn").addEventListener("click", ()=>{
+            showToast('success','Download Started','Receiver downloading file');
+          });
+          $("copyDl").addEventListener("click", ()=>{
+            copyText(downloadLink);
+          });
+
+        }else{
           box.innerHTML = "<p class='text-red-600 font-semibold animate__animated animate__shakeX'>❌ No file found for this ID</p>";
         }
       });
     }
   </script>
-
 </body>
 </html>
